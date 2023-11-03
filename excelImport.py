@@ -10,22 +10,43 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
 driver = webdriver.Chrome()
+# Crear la ventana principal
+ventana = tk.Tk()
+ventana.title("Captura de mensaje y selección de archivo Excel")
+ventana.geometry("300x200")
+
+# Crear una etiqueta para el mensaje
+etiqueta = tk.Label(ventana, text="Escribe tu mensaje:")
+entrada = tk.Entry(ventana, width=40, height=8)
+
+etiqueta.pack(pady=10)
+
+# Crear un campo de entrada para el mensaje
+entrada_mensaje = tk.Entry(ventana)
+entrada_mensaje.pack()
+
+# Cambiar el estilo de la entrada de texto
+style = ttk.Style()
+style.configure('TButton', font=('calibri', 12, 'bold'))  # Cambia la fuente del texto del botón
+
 
 
 def abrir_archivo_excel(mensaje):
     archivo_excel = filedialog.askopenfilename(filetypes=[("Archivos de Excel", "*.xlsx")])
     if archivo_excel:
-        driver.get('https://web.whatsapp.com')
         ventana.destroy()
+        driver.get('https://web.whatsapp.com')
         df = pd.read_excel(archivo_excel)
-        for index, row in df.iterrows():
-            # import pdb; pdb.set_trace()
-            mensaje_persona = mensaje.replace("{nombre}", str(row['NOMBRE']))
-            mensaje_persona = mensaje_persona.replace("{telefono}", str(row['TELEFONO']))
-            print(str(row['TELEFONO']))
-            enviar_mensaje(mensaje_persona,str(row['TELEFONO']))
-    driver.implicitly_wait(10)
-    driver.quit()
+        try:
+            for index, row in df.iterrows():
+                # import pdb; pdb.set_trace()
+                mensaje_persona = mensaje.replace("{nombre}", str(row['NOMBRE']))
+                mensaje_persona = mensaje_persona.replace("{telefono}", str(row['TELEFONO']))
+                print(str(row['TELEFONO']))
+                enviar_mensaje(mensaje_persona,str(row['TELEFONO']))
+        except Exception as e:
+            print("error {e}")
+    # driver.quit()
 
 def obtener_mensaje():
     mensaje = entrada_mensaje.get()
@@ -52,21 +73,6 @@ def enviar_mensaje(mensaje,numero):
     # send.click()
     # driver.quit()
 
-# Crear la ventana principal
-ventana = tk.Tk()
-ventana.title("Captura de mensaje y selección de archivo Excel")
-
-# Crear una etiqueta para el mensaje
-etiqueta = tk.Label(ventana, text="Escribe tu mensaje:")
-etiqueta.pack(pady=10)
-
-# Crear un campo de entrada para el mensaje
-entrada_mensaje = tk.Entry(ventana)
-entrada_mensaje.pack()
-
-# Cambiar el estilo de la entrada de texto
-style = ttk.Style()
-style.configure('TButton', font=('calibri', 12, 'bold'))  # Cambia la fuente del texto del botón
 
 # Crear un botón para continuar
 boton_continuar = ttk.Button(ventana, text="Continuar", command=obtener_mensaje)
